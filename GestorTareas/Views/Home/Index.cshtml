@@ -1,0 +1,138 @@
+@{
+    ViewBag.Title = "Inicio";
+    string userName  = ViewBag.UserName as string;
+    int    taskCount = ViewBag.TaskCount != null ? (int)ViewBag.TaskCount : 0;
+}
+
+<div class="jumbotron gt-jumbotron">
+    <div class="container">
+        <h1><span class="glyphicon glyphicon-tasks"></span>GestorTareas</h1>
+        <p class="lead">Organiza tus actividades de forma sencilla y eficiente.</p>
+
+        @if (!string.IsNullOrEmpty(userName))
+        {
+            <p>
+                ¡Hola, <strong>@userName</strong>!
+                Tienes <strong>@taskCount</strong> tarea(s) registrada(s).
+            </p>
+            <a href="@Url.Action("Index","Task")" class="btn btn-primary btn-lg">
+                <span class="glyphicon glyphicon-list"></span> Ver mis tareas
+            </a>
+            <a href="@Url.Action("Create","Task")" class="btn btn-success btn-lg">
+                <span class="glyphicon glyphicon-plus"></span> Nueva tarea
+            </a>
+        }
+        else
+        {
+            <p>Para comenzar, ingresa tu nombre a continuacion:</p>
+        }
+    </div>
+</div>
+
+<div class="container">
+
+    @if (string.IsNullOrEmpty(userName))
+    {
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <span class="glyphicon glyphicon-user"></span>
+                            Identificacion de usuario
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        @using (Html.BeginForm("SetUserName", "Home", FormMethod.Post,
+                                               new { id = "userNameForm" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <div class="form-group" id="nameGroup">
+                                <label for="userName">Tu nombre:</label>
+                                <input type="text"
+                                       id="userName"
+                                       name="userName"
+                                       class="form-control"
+                                       placeholder="Ej: Sebastian Arias"
+                                       maxlength="50"
+                                       autocomplete="off" />
+                                <span id="nameError" class="help-block text-danger"
+                                      style="display:none;">
+                                    Por favor, ingresa tu nombre.
+                                </span>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block" id="btnSetName">
+                                <span class="glyphicon glyphicon-log-in"></span> Ingresar
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+
+    <div class="row gt-features">
+        <div class="col-md-4">
+            <div class="gt-feature-card">
+                <span class="glyphicon glyphicon-pencil gt-feature-icon text-primary"></span>
+                <h3>Registrar Tareas</h3>
+                <p>Crea tareas con titulo, descripcion, prioridad y fecha de vencimiento.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="gt-feature-card">
+                <span class="glyphicon glyphicon-search gt-feature-icon text-success"></span>
+                <h3>Filtrar Dinamicamente</h3>
+                <p>Filtra tareas por estado usando AJAX, sin recargar la pagina.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="gt-feature-card">
+                <span class="glyphicon glyphicon-bell gt-feature-icon text-warning"></span>
+                <h3>Control de Vencimientos</h3>
+                <p>Identifica tareas vencidas y da seguimiento a tu progreso.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section scripts {
+<script>
+    // ── JavaScript: client-side validation of the user name form ──────────────
+
+    var form      = document.getElementById('userNameForm');
+    var nameInput = document.getElementById('userName');
+    var nameError = document.getElementById('nameError');
+    var nameGroup = document.getElementById('nameGroup');
+
+    if (form) {
+        // Prevent submit if name is blank; show inline error instead
+        form.addEventListener('submit', function (e) {
+            if (nameInput.value.trim() === '') {
+                e.preventDefault();
+                showNameError();
+            }
+        });
+
+        // Clear error as the user types
+        nameInput.addEventListener('input', function () {
+            if (this.value.trim() !== '') {
+                clearNameError();
+            }
+        });
+    }
+
+    function showNameError() {
+        nameError.style.display = 'block';
+        nameGroup.classList.add('has-error');
+        nameInput.focus();
+    }
+
+    function clearNameError() {
+        nameError.style.display = 'none';
+        nameGroup.classList.remove('has-error');
+    }
+</script>
+}

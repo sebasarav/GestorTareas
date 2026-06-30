@@ -1,0 +1,199 @@
+/* ============================================================
+   site.css – GestorTareas custom styles
+   Bootstrap 3 is the base; these classes extend or override it.
+   ============================================================ */
+
+/* ── General layout ─────────────────────────────────────── */
+body {
+    padding-top: 70px; /* offset for the fixed navbar */
+    background-color: #f4f6f9;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.body-content {
+    padding: 20px 0 40px;
+}
+
+/* ── Navbar ──────────────────────────────────────────────── */
+.navbar-inverse {
+    background-color: #1a2b3c;
+    border-color: #111f2d;
+}
+
+.navbar-inverse .navbar-brand {
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-size: 1.3em;
+}
+
+/* ── Jumbotron / hero banner ─────────────────────────────── */
+.gt-jumbotron {
+    background: linear-gradient(135deg, #1a2b3c 0%, #2980b9 100%);
+    color: #fff;
+    border-radius: 0;
+    margin-bottom: 30px;
+    padding: 40px 0;
+}
+
+.gt-jumbotron h1,
+.gt-jumbotron p,
+.gt-jumbotron .lead {
+    color: #fff;
+}
+
+/* ── Statistics summary cards ────────────────────────────── */
+.gt-stats-row {
+    margin-bottom: 25px;
+}
+
+.gt-stat-card {
+    text-align: center;
+    padding: 18px 10px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,.15);
+    transition: transform .15s ease;
+}
+
+.gt-stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.gt-stat-total     { background-color: #1a2b3c; }
+.gt-stat-pending   { background-color: #e67e22; }
+.gt-stat-progress  { background-color: #2980b9; }
+.gt-stat-completed { background-color: #27ae60; }
+
+.gt-stat-number {
+    font-size: 2.2em;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.gt-stat-label {
+    font-size: .78em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+
+/* ── Filter panel ────────────────────────────────────────── */
+.gt-filter-panel {
+    margin-bottom: 20px;
+}
+
+/* ── Task table ──────────────────────────────────────────── */
+.gt-table-header {
+    background-color: #1a2b3c;
+}
+
+.gt-table-header th {
+    color: #fff !important;
+    font-weight: 600;
+    border-bottom: none !important;
+}
+
+/* Highlight overdue rows with a subtle red tint */
+.gt-row-overdue td {
+    background-color: #fdf0ee !important;
+}
+
+.gt-overdue-badge {
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+/* ── Action bar below tables / forms ─────────────────────── */
+.gt-action-bar {
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+/* ── Feature cards on home page ──────────────────────────── */
+.gt-features {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.gt-feature-card {
+    text-align: center;
+    padding: 30px 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    margin-bottom: 20px;
+    transition: box-shadow .2s ease;
+}
+
+.gt-feature-card:hover {
+    box-shadow: 0 6px 18px rgba(0,0,0,.14);
+}
+
+.gt-feature-icon {
+    font-size: 2.6em;
+    margin-bottom: 14px;
+    display: block;
+}
+
+/* ── Create / edit form panel ────────────────────────────── */
+.gt-form-panel {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    margin-bottom: 30px;
+}
+
+/* Character counter text below text inputs */
+.gt-char-counter {
+    text-align: right;
+    font-size: .82em;
+    color: #888;
+    margin: 3px 0 0;
+}
+
+.gt-char-counter.gt-counter-warning {
+    color: #e67e22;
+    font-weight: 700;
+}
+
+/* ── Detail view panel ───────────────────────────────────── */
+.gt-detail-panel {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    overflow: hidden;
+    margin-bottom: 25px;
+}
+
+.gt-detail-header {
+    padding: 22px 28px;
+    background-color: #1a2b3c;
+    color: #fff;
+}
+
+.gt-detail-body {
+    padding: 10px 28px 20px;
+}
+
+.gt-detail-row {
+    padding: 12px 0;
+    border-bottom: 1px solid #eef0f2;
+}
+
+.gt-detail-row:last-child {
+    border-bottom: none;
+}
+
+.gt-detail-label {
+    font-weight: 600;
+    color: #555;
+    padding-top: 3px;
+}
+
+/* ── Footer ──────────────────────────────────────────────── */
+footer {
+    margin-top: 20px;
+    padding: 18px 0;
+}

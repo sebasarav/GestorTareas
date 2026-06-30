@@ -1,0 +1,191 @@
+@model GestorTareas.Models.TaskItem
+
+@{
+    ViewBag.Title = "Nueva Tarea";
+}
+<meta charset="UTF-8">
+<div class="page-header">
+    <h1>
+        <span class="glyphicon glyphicon-plus-sign"></span> Nueva Tarea
+    </h1>
+</div>
+
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+
+        @Html.ValidationSummary(true, "Corrija los errores antes de continuar:",
+                                new { @class = "alert alert-danger" })
+
+        <div class="gt-form-panel">
+
+            @using (Html.BeginForm("Create", "Task", FormMethod.Post,
+                                   new { id = "createTaskForm", novalidate = "novalidate" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Title, new { @class = "control-label" })
+                    @Html.TextBoxFor(m => m.Title, new
+                    {
+                        @class      = "form-control",
+                        id          = "taskTitle",
+                        placeholder = "Ej: Revisar documentacion del proyecto",
+                        maxlength   = "100",
+                        autocomplete = "off"
+                    })
+                    @Html.ValidationMessageFor(m => m.Title, "", new { @class = "help-block text-danger" })
+                    <p class="gt-char-counter">
+                        <span id="titleCount">0</span>/100 caracteres
+                    </p>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Description, new { @class = "control-label" })
+                    @Html.TextAreaFor(m => m.Description, 4, 0, new
+                    {
+                        @class      = "form-control",
+                        id          = "taskDesc",
+                        placeholder = "Describe brevemente en que consiste la tarea",
+                        maxlength   = "500"
+                    })
+                    @Html.ValidationMessageFor(m => m.Description, "", new { @class = "help-block text-danger" })
+                    <p class="gt-char-counter">
+                        <span id="descCount">0</span>/500 caracteres
+                    </p>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Priority, new { @class = "control-label" })
+                            @Html.DropDownListFor(m => m.Priority,
+                                                  (SelectList)ViewBag.PriorityList,
+                                                  new { @class = "form-control", id = "taskPriority" })
+                            @Html.ValidationMessageFor(m => m.Priority, "",
+                                                       new { @class = "help-block text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Status, new { @class = "control-label" })
+                            @Html.DropDownListFor(m => m.Status,
+                                                  (SelectList)ViewBag.StatusList,
+                                                  new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Status, "",
+                                                       new { @class = "help-block text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div id="priorityInfo" class="alert" style="display:none; margin-bottom:15px;">
+                    <span class="glyphicon glyphicon-info-sign"></span>
+                    <span id="priorityMessage"></span>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(m => m.DueDate, new { @class = "control-label" })
+                    @Html.TextBoxFor(m => m.DueDate, "{0:yyyy-MM-dd}", new
+                    {
+                        @class = "form-control",
+                        type   = "date",
+                        id     = "taskDueDate"
+                    })
+                    @Html.ValidationMessageFor(m => m.DueDate, "",
+                                               new { @class = "help-block text-danger" })
+                    <p class="help-block text-warning" id="dueDateWarning" style="display:none;">
+                        <span class="glyphicon glyphicon-warning-sign"></span>
+                        La fecha seleccionada esta en el pasado. Por favor elige una fecha futura.
+                    </p>
+                </div>
+
+                <hr />
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success btn-lg" id="btnRegister">
+                        <span class="glyphicon glyphicon-floppy-disk"></span> Registrar Tarea
+                    </button>
+                    @Html.ActionLink("Cancelar", "Index", null,
+                                     new { @class = "btn btn-default btn-lg" })
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+<script>
+    // ── Character counter: Título ─────────────────────────────────────────────
+    var titleInput = document.getElementById('taskTitle');
+    var titleCount = document.getElementById('titleCount');
+
+    function updateTitleCount() {
+        var len = titleInput.value.length;
+        titleCount.textContent = len;
+        titleCount.parentElement.className =
+            'gt-char-counter' + (len > 90 ? ' gt-counter-warning' : '');
+    }
+    titleInput.addEventListener('input', updateTitleCount);
+    updateTitleCount(); // Run on load to handle repopulated values after validation error
+
+    // ── Character counter: Descripción ───────────────────────────────────────
+    var descInput = document.getElementById('taskDesc');
+    var descCount = document.getElementById('descCount');
+
+    function updateDescCount() {
+        var len = descInput.value.length;
+        descCount.textContent = len;
+        descCount.parentElement.className =
+            'gt-char-counter' + (len > 450 ? ' gt-counter-warning' : '');
+    }
+    descInput.addEventListener('input', updateDescCount);
+    updateDescCount();
+
+    // ── Priority info box: show contextual message on selection change ────────
+    var prioritySelect  = document.getElementById('taskPriority');
+    var priorityInfo    = document.getElementById('priorityInfo');
+    var priorityMessage = document.getElementById('priorityMessage');
+
+    var priorityData = {
+        'High':   { css: 'alert-danger',  msg: 'Prioridad Alta: esta tarea requiere atencion inmediata.' },
+        'Medium': { css: 'alert-warning', msg: 'Prioridad Media: realiza esta tarea dentro de los proximos dias.' },
+        'Low':    { css: 'alert-info',    msg: 'Prioridad Baja: puedes realizarla cuando tengas disponibilidad.' }
+    };
+
+    function updatePriorityInfo() {
+        var selected = prioritySelect.value;
+        var data = priorityData[selected];
+        if (data) {
+            priorityInfo.className   = 'alert ' + data.css;
+            priorityMessage.textContent = data.msg;
+            priorityInfo.style.display  = 'block';
+        } else {
+            priorityInfo.style.display = 'none';
+        }
+    }
+    prioritySelect.addEventListener('change', updatePriorityInfo);
+    updatePriorityInfo(); // Show on load
+
+    // ── Due date: warn immediately if user picks a past date ─────────────────
+    var dueDateInput   = document.getElementById('taskDueDate');
+    var dueDateWarning = document.getElementById('dueDateWarning');
+
+    dueDateInput.addEventListener('change', function () {
+        var picked = new Date(this.value + 'T00:00:00');
+        var today  = new Date();
+        today.setHours(0, 0, 0, 0);
+        dueDateWarning.style.display = picked < today ? 'block' : 'none';
+    });
+
+    // ── Form submit: ask for confirmation before posting ─────────────────────
+    document.getElementById('createTaskForm').addEventListener('submit', function (e) {
+        var title = titleInput.value.trim();
+        if (title === '') return; // Let the validation framework handle the empty-field error
+
+        if (!confirm('\u00BFDesea registrar la tarea ' + title + '?')) {
+            e.preventDefault();
+        }
+    });
+</script>
+}

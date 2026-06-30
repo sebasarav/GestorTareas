@@ -1,0 +1,327 @@
+@model List<GestorTareas.Models.TaskItem>
+@using GestorTareas.Models
+
+@{
+    ViewBag.Title = "Mis Tareas";
+}
+
+<div class="page-header">
+    <h1>
+        <span class="glyphicon glyphicon-list"></span> Mis Tareas
+        <small>@Model.Count tarea(s)</small>
+    </h1>
+</div>
+
+
+<div class="row gt-stats-row">
+    <div class="col-xs-6 col-sm-3">
+        <div class="gt-stat-card gt-stat-total">
+            <div class="gt-stat-number" id="statTotal">@ViewBag.TotalCount</div>
+            <div class="gt-stat-label">Total</div>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-3">
+        <div class="gt-stat-card gt-stat-pending">
+            <div class="gt-stat-number" id="statPending">@ViewBag.PendingCount</div>
+            <div class="gt-stat-label">Pendientes</div>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-3">
+        <div class="gt-stat-card gt-stat-progress">
+            <div class="gt-stat-number" id="statInProgress">@ViewBag.InProgressCount</div>
+            <div class="gt-stat-label">En Progreso</div>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-3">
+        <div class="gt-stat-card gt-stat-completed">
+            <div class="gt-stat-number" id="statCompleted">@ViewBag.CompletedCount</div>
+            <div class="gt-stat-label">Completadas</div>
+        </div>
+    </div>
+</div>
+
+
+@if ((int)ViewBag.OverdueCount > 0)
+{
+    <div class="alert alert-warning">
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        Tienes <strong>@ViewBag.OverdueCount</strong> tarea(s) vencida(s).
+        Revisa la lista para identificarlas (marcadas en rojo).
+    </div>
+}
+
+<div class="panel panel-default gt-filter-panel">
+    <div class="panel-heading">
+        <h4 class="panel-title">
+            <span class="glyphicon glyphicon-filter">Filtrar por estado</span> 
+            <span class="text-muted pull-right small" id="filterStatus"></span>
+        </h4>
+    </div>
+    <div class="panel-body">
+        <div class="btn-group" role="group" aria-label="Filtro de tareas">
+            <button type="button" class="btn btn-default btn-filter active"
+                    onclick="filterTasks('All', this)">
+                Todas
+            </button>
+            <button type="button" class="btn btn-default btn-filter"
+                    onclick="filterTasks('Pending', this)">
+                <span class="label label-warning">Pendiente</span>
+            </button>
+            <button type="button" class="btn btn-default btn-filter"
+                    onclick="filterTasks('InProgress', this)">
+                <span class="label label-info">En Progreso</span>
+            </button>
+            <button type="button" class="btn btn-default btn-filter"
+                    onclick="filterTasks('Completed', this)">
+                <span class="label label-success">Completada</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+@using (Html.BeginForm("Delete", "Task", FormMethod.Post,
+                       new { id = "csrfForm", style = "display:none;" }))
+{
+    @Html.AntiForgeryToken()
+}
+
+
+<div id="taskListContainer">
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info" id="emptyMessage">
+            <span class="glyphicon glyphicon-info-sign"></span>
+            No hay tareas registradas aun.
+            @Html.ActionLink("Registra tu primera tarea aqui", "Create", null,
+                                  new { @class = "alert-link" }).
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="gt-table-header">
+                    <tr>
+                        <th>#</th>
+                        <th>Titulo</th>
+                        <th>Estado</th>
+                        <th>Prioridad</th>
+                        <th>Vence</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var task in Model)
+                    {
+                        <tr class="@(task.IsOverdue ? "gt-row-overdue" : "")">
+                            <td>@task.Id</td>
+                            <td>
+                                <strong>@task.Title</strong>
+                                @if (task.IsOverdue)
+                                {
+                                    <span class="label label-danger gt-overdue-badge">Vencida</span>
+                                }
+                            </td>
+                            <td>
+                                @switch (task.Status)
+                                {
+                                    case TaskStatus.Pending:
+                                        <span class="label label-warning">Pendiente</span>
+                                        break;
+                                    case TaskStatus.InProgress:
+                                        <span class="label label-info">En Progreso</span>
+                                        break;
+                                    case TaskStatus.Completed:
+                                        <span class="label label-success">Completada</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @switch (task.Priority)
+                                {
+                                    case TaskPriority.High:
+                                        <span class="label label-danger">Alta</span>
+                                        break;
+                                    case TaskPriority.Medium:
+                                        <span class="label label-warning">Media</span>
+                                        break;
+                                    case TaskPriority.Low:
+                                        <span class="label label-default">Baja</span>
+                                        break;
+                                }
+                            </td>
+                            <td>@task.DueDate.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @Html.ActionLink("Ver", "Details", new { id = task.Id },
+                                                      new { @class = "btn btn-xs btn-info" })
+
+                                @using (Html.BeginForm("Delete", "Task", FormMethod.Post,
+                                                       new { style = "display:inline;" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <button type="submit"
+                                            class="btn btn-xs btn-danger btn-delete"
+                                            data-task-title="@task.Title">
+                                        Eliminar
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div class="gt-action-bar">
+    @Html.ActionLink("+ Nueva Tarea", "Create", null, new { @class = "btn btn-success" })
+</div>
+
+@section scripts {
+    <script>
+    // ── Attach delete confirmation to server-rendered buttons ─────────────────
+    document.querySelectorAll('.btn-delete').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            var title = this.getAttribute('data-task-title');
+            if (!confirm('\u00BFEsta seguro de que desea eliminar la tarea ' + title + '?\nEsta accion no se puede deshacer.')) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // ── AJAX: Filter tasks by status ──────────────────────────────────────────
+    function filterTasks(status, btnEl) {
+        document.querySelectorAll('.btn-filter').forEach(function (b) {
+            b.classList.remove('active');
+        });
+        btnEl.classList.add('active');
+
+        var statusEl = document.getElementById('filterStatus');
+        statusEl.textContent = 'Buscando';
+        document.getElementById('taskListContainer').style.opacity = '0.4';
+
+        $.ajax({
+            url: '@Url.Action("SearchByStatus", "Task")',
+            type: 'GET',
+            data: { status: status },
+            success: function (tasks) {
+                renderTaskTable(tasks);
+                document.getElementById('taskListContainer').style.opacity = '1';
+
+                var label = status === 'All' ? 'todas las tareas'
+                          : status === 'Pending' ? 'tareas pendientes'
+                          : status === 'InProgress' ? 'tareas en progreso'
+                          : 'tareas completadas';
+                statusEl.textContent = tasks.length + ' resultado(s) ' + label;
+            },
+            error: function () {
+                document.getElementById('taskListContainer').style.opacity = '1';
+                statusEl.textContent = 'Error al filtrar. Intente de nuevo.';
+            }
+        });
+    }
+
+    function renderTaskTable(tasks) {
+        var container = document.getElementById('taskListContainer');
+
+        if (tasks.length === 0) {
+            container.innerHTML =
+                '<div class="alert alert-info">' +
+                '<span class="glyphicon glyphicon-info-sign"></span> ' +
+                'No se encontraron tareas con el filtro seleccionado.' +
+                '</div>';
+            return;
+        }
+
+        
+        var csrfInput = document.querySelector('#csrfForm input[name="__RequestVerificationToken"]');
+        if (!csrfInput) {
+            console.error('Token CSRF no encontrado');
+            return;
+        }
+        var csrfToken = csrfInput.value;
+
+        
+        var deleteUrl = '@Url.Action("Delete", "Task")';
+        var detailsUrl = '@Url.Action("Details", "Task")';
+
+        var html = '<div class="table-responsive">' +
+            '<table class="table table-striped table-hover">' +
+            '<thead class="gt-table-header"><tr>' +
+            '<th>#</th><th>Titulo</th><th>Estado</th><th>Prioridad</th><th>Vence</th><th>Acciones</th>' +
+            '</tr></thead><tbody>';
+
+        tasks.forEach(function (t) {
+            var rowClass = t.isOverdue ? 'gt-row-overdue' : '';
+            var overdueTag = t.isOverdue ? ' <span class="label label-danger gt-overdue-badge">Vencida</span>' : '';
+            var statusBadge = buildStatusBadge(t.status, t.statusLabel);
+            var priorityBadge = buildPriorityBadge(t.priority, t.priorityLabel);
+
+            
+            var deleteForm =
+                '<form method="POST" action="' + deleteUrl + '" style="display:inline;">' +
+                '<input type="hidden" name="__RequestVerificationToken" value="' + escHtml(csrfToken) + '" />' +
+                '<input type="hidden" name="id" value="' + t.id + '" />' +
+                '<button type="submit" class="btn btn-xs btn-danger btn-delete-dyn" ' +
+                'data-task-title="' + escHtml(t.title) + '">Eliminar</button>' +
+                '</form>';
+
+            html +=
+                '<tr class="' + rowClass + '">' +
+                '<td>' + t.id + '</td>' +
+                '<td><strong>' + escHtml(t.title) + '</strong>' + overdueTag + '</td>' +
+                '<td>' + statusBadge + '</td>' +
+                '<td>' + priorityBadge + '</td>' +
+                '<td>' + escHtml(t.dueDate) + '</td>' + 
+                '<td>' +
+                '<a href="' + detailsUrl + '/' + t.id + '" class="btn btn-xs btn-info">Ver</a> ' +
+                deleteForm +
+                '</td>' +
+                '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+
+        
+        document.querySelectorAll('.btn-delete-dyn').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                var title = this.getAttribute('data-task-title');
+                if (!confirm('¿Esta seguro de que desea eliminar la tarea "' + title + '"?\nEsta accion no se puede deshacer.')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    }
+
+   
+    function buildStatusBadge(status, label) {
+        if (!status || status === 'All') {
+            return '<span class="label label-default">' + escHtml(label || 'Todos') + '</span>';
+        }
+        var cls = status === 'Pending' ? 'warning'
+                : status === 'InProgress' ? 'info'
+                : 'success';
+        return '<span class="label label-' + cls + '">' + escHtml(label) + '</span>';
+    }
+
+    function buildPriorityBadge(priority, label) {
+        var cls = priority === 'High' ? 'danger'
+                : priority === 'Medium' ? 'warning'
+                : 'default';
+        return '<span class="label label-' + cls + '">' + escHtml(label) + '</span>';
+    }
+
+    function escHtml(text) {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+    </script>
+}

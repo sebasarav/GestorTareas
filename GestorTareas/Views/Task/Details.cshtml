@@ -1,0 +1,139 @@
+@model GestorTareas.Models.TaskItem
+@using GestorTareas.Models
+
+@{
+    ViewBag.Title = "Detalle de Tarea";
+
+    // Helpers to convert enum values to Spanish labels and badge CSS classes
+    string statusLabel = Model.Status == TaskStatus.Pending    ? "Pendiente"
+                       : Model.Status == TaskStatus.InProgress ? "En Progreso"
+                       : "Completada";
+
+    string statusCss   = Model.Status == TaskStatus.Pending    ? "warning"
+                       : Model.Status == TaskStatus.InProgress ? "info"
+                       : "success";
+
+    string priorityLabel = Model.Priority == TaskPriority.High   ? "Alta"
+                         : Model.Priority == TaskPriority.Medium ? "Media"
+                         : "Baja";
+
+    string priorityCss   = Model.Priority == TaskPriority.High   ? "danger"
+                         : Model.Priority == TaskPriority.Medium ? "warning"
+                         : "default";
+}
+
+<div class="page-header">
+    <h1>
+        <span class="glyphicon glyphicon-file"></span> Detalle de Tarea
+        <small>#@Model.Id</small>
+    </h1>
+</div>
+
+@if (Model.IsOverdue)
+{
+    <div class="alert alert-danger">
+        <span class="glyphicon glyphicon-exclamation-sign"></span>
+        <strong>Atencion:</strong> Esta tarea esta vencida (vencio el @Model.DueDate.ToString("dd/MM/yyyy")).
+    </div>
+}
+
+<div class="gt-detail-panel">
+
+
+    <div class="gt-detail-header">
+        <h3 style="margin:0;">
+            @Model.Title
+            @if (Model.IsOverdue)
+            {
+                <span class="label label-danger" style="margin-left:10px; font-size:0.6em;">Vencida</span>
+            }
+        </h3>
+    </div>
+
+    
+    <div class="gt-detail-body">
+
+        <div class="row gt-detail-row">
+            <div class="col-sm-3 gt-detail-label">Estado</div>
+            <div class="col-sm-9">
+                <span class="label label-@statusCss label-lg" style="font-size:1em; padding:5px 10px;">
+                    @statusLabel
+                </span>
+            </div>
+        </div>
+
+        <div class="row gt-detail-row">
+            <div class="col-sm-3 gt-detail-label">Prioridad</div>
+            <div class="col-sm-9">
+                <span class="label label-@priorityCss label-lg" style="font-size:1em; padding:5px 10px;">
+                    @priorityLabel
+                </span>
+            </div>
+        </div>
+
+        <div class="row gt-detail-row">
+            <div class="col-sm-3 gt-detail-label">Descripcion</div>
+            <div class="col-sm-9">@Model.Description</div>
+        </div>
+
+        <div class="row gt-detail-row">
+            <div class="col-sm-3 gt-detail-label">Fecha de vencimiento</div>
+            <div class="col-sm-9 @(Model.IsOverdue ? "text-danger" : "")">
+                <span class="glyphicon glyphicon-calendar"></span>
+                @Model.DueDate.ToString("dd/MM/yyyy")
+                @if (Model.IsOverdue)
+                {
+                    <strong> VENCIDA</strong>
+                }
+            </div>
+        </div>
+
+        <div class="row gt-detail-row">
+            <div class="col-sm-3 gt-detail-label">Fecha de creacion</div>
+            <div class="col-sm-9">
+                <span class="glyphicon glyphicon-time"></span>
+                @Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+            </div>
+        </div>
+
+        <div class="row gt-detail-row">
+            <div class="col-sm-3 gt-detail-label">ID de tarea</div>
+            <div class="col-sm-9 text-muted">#@Model.Id</div>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="gt-action-bar">
+    @Html.ActionLink("Volver a la lista", "Index", null,
+                     new { @class = "btn btn-default" })
+
+    @using (Html.BeginForm("Delete", "Task", FormMethod.Post,
+                           new { id = "deleteForm", style = "display:inline; margin-left:10px;" }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button type="submit"
+                id="btnDelete"
+                class="btn btn-danger"
+                data-task-title="@Model.Title">
+            <span class="glyphicon glyphicon-trash"></span> Eliminar esta tarea
+        </button>
+    }
+
+    @Html.ActionLink("+ Nueva Tarea", "Create", null,
+                     new { @class = "btn btn-success", style = "margin-left:10px;" })
+</div>
+
+@section scripts {
+<script>
+    // JavaScript: require explicit user confirmation before submitting the delete form
+    document.getElementById('btnDelete').addEventListener('click', function (e) {
+        var title = this.getAttribute('data-task-title');
+        if (!confirm('¿Está seguro de que desea eliminar la tarea "' + title + '"?\n\nEsta acción no se puede deshacer.')) {
+            e.preventDefault(); // Abort form submission if the user cancels
+        }
+    });
+</script>
+}
